@@ -2,13 +2,197 @@
 <html>
 <head>
   <title>Gemtester</title>
-  <%= stylesheet_link_tag :all %>
-  <%= javascript_include_tag :defaults %>
+  <script src="/javascripts/jquery-1.4.2.min.js"></script>
+  <script src="/javascripts/jquery-ui-1.8.2.custom.min.js"></script>
+  <script src="/javascripts/jquery.ui.nestedSortable.js"></script>  
+  <%=  javascript_include_tag 'rails' %>  
   <%= csrf_meta_tag %>
+  
+  <style type="text/css">
+
+  		html {
+  			background-color: #eee;
+  		}
+
+  		body {
+  			color: #555;
+  			background-color: #fff;
+  			font-size: 12px;
+  			font-family: "Helvetica Neue", Corbel, "Nimbus Sans L", Helvetica, Arial, sans-serif;
+  			padding: 2em 4em;
+  			width: 690px;
+  			margin: 0 auto;
+  		}
+
+  		pre, code {
+  			font-size: 12px;
+  		}
+
+  		small {
+  			font-size: 90%;
+  		}
+
+  		small code {
+  			font-size: 11px;
+  		}
+
+  		.placeholder {
+  			background-color: #cfcfcf;
+  		}
+
+  		.ui-nestedSortable-error {
+  			background:#fbe3e4;
+  			color:#8a1f11;
+  		}
+
+  		ol {
+  			margin: 0;
+  			padding: 0;
+  			padding-left: 30px;
+  		}
+
+  		ol.sortable, ol.sortable ol {
+  			margin: 0 0 0 25px;
+  			padding: 0;
+  			list-style-type: none;
+  		}
+
+  		ol.sortable {
+  			margin: 4em 0;
+  		}
+
+  		.sortable li {
+  			margin: 4px 0 0 0;
+  			padding: 0;
+  		}
+
+  		.sortable li div  {
+  			border: 1px solid #eee;
+  			background: #f5f5f5;
+  			padding: 3px;
+  			margin: 0;
+  			cursor: move;
+  		}
+
+  		h1 {
+  			font-size: 2em;
+  			margin-bottom: 0;
+  		}
+
+  		h2 {
+  			font-size: 1.2em;
+  			font-weight: normal;
+  			font-style: italic;
+  			margin-top: .2em;
+  			margin-bottom: 1.5em;
+  		}
+
+  		h3 {
+  			font-size: 1em;
+  			margin: 1em 0 .3em;;
+  		}
+
+  		p, ol, ul, pre {
+  			margin-top: 0;
+  			margin-bottom: 1em;
+  		}
+
+  		dl {
+  			margin: 0;
+  		}
+
+  		dd {
+  			margin: 0;
+  			padding: 0 0 0 1.5em;
+  		}
+
+  		code {
+  			background: #e5e5e5;
+  		}
+
+  		#notice {
+  			color: #c33;
+  		}
+
+  	</style>
+  
+    
 </head>
 <body>
 
 <%= yield %>
 
+
+<script>
+
+	$(document).ready(function(){
+
+		$('ol.sortable').nestedSortable({
+			disableNesting: 'no-nest',
+			forcePlaceholderSize: true,
+			handle: $('span.handle'),
+			items: 'li',
+			opacity: .6,
+			placeholder: 'placeholder',
+			tabSize: 25,
+			tolerance: 'pointer',
+			toleranceElement: '> div'
+		});
+
+		$('#serialize').click(function(){
+			serialized = $('ol.sortable').nestedSortable('serialize');
+			$('#serializeOutput').text(serialized);
+		})
+
+		$('#toArray').click(function(e){
+			arraied = $('ol.sortable').nestedSortable('toArray', {startDepthCount: 0});
+			arraied = dump(arraied);
+			(typeof($('#toArrayOutput')[0].textContent) != 'undefined') ?
+			$('#toArrayOutput')[0].textContent = arraied : $('#toArrayOutput')[0].innerText = arraied;			
+		})
+		
+		$('#toArray').click(function(e){
+		    
+		    arraied = $('ol.sortable').nestedSortable('toArray', {startDepthCount: 0});
+			arraied = dump(arraied);
+		    
+            $.ajax({
+               type: "POST",
+               url: "/categories/sort/",
+               data: arraied,
+               success: function(data){
+                 alert( "Data Saved: " + data );
+               }
+             });
+            })
+
+	});
+
+	function dump(arr,level) {
+		var dumped_text = "";
+		if(!level) level = 0;
+
+		//The padding given at the beginning of the line.
+		var level_padding = "";
+		for(var j=0;j<level+1;j++) level_padding += "    ";
+
+		if(typeof(arr) == 'object') { //Array/Hashes/Objects
+			for(var item in arr) {
+				var value = arr[item];
+
+				if(typeof(value) == 'object') { //If it is an array,
+					dumped_text += level_padding + "'" + item + "' ...\n";
+					dumped_text += dump(value,level+1);
+				} else {
+					dumped_text += level_padding + "'" + item + "' => \"" + value + "\"\n";
+				}
+			}
+		} else { //Stings/Chars/Numbers etc.
+			dumped_text = "===>"+arr+"<===("+typeof(arr)+")";
+		}
+		return dumped_text;
+	}
+
+</script>
 </body>
 </html>

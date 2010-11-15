@@ -2,7 +2,7 @@ class CategoriesController < ApplicationController
   # GET /categories
   # GET /categories.xml
   def index
-    @categories = Category.all
+    @categories = Category.where(:parent_id => nil)
 
     respond_to do |format|
       format.html # index.html.erb
@@ -80,4 +80,12 @@ class CategoriesController < ApplicationController
       format.xml  { head :ok }
     end
   end
+  
+  def sort
+    params[:list].each_with_index do |id, index|      
+      Category.update_all(['depth=?', index+1], ['id=?', id])
+    end
+      render :nothing => true
+  end
+  
 end

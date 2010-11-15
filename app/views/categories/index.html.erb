@@ -28,4 +28,20 @@
 
 <br />
 
+<ol class="sortable">
+<% for category in @categories %>
+    <li id="list_<%= category.id %>"><div><span class="handle">| Handle |</span> <%= category.name %></div>
+        <%= raw(find_all_subcategories(category)) %>
+   </li>
+<% end %>
+</ol>
+
+<p>
+	<input type="submit" name="serialize" id="serialize" value="Serialize" />
+<p id="serializeOutput"></p>
+
+<p>
+	<input type="submit" name="toArray" id="toArray" value="To array" />
+<pre id="toArrayOutput"></pre>
+
 <%= link_to 'New Category', new_category_path %>
